@@ -16,16 +16,18 @@ import { SmartSearchModal } from './components/SmartSearchModal';
 import { AIFashionStylist } from './components/AIFashionStylist';
 import { CustomerDashboard } from './components/CustomerDashboard';
 
-// Admin Components
-import { AdminLayout } from './components/admin/AdminLayout';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { AdminProducts } from './components/admin/AdminProducts';
-import { AdminOrders } from './components/admin/AdminOrders';
-import { AdminInventory } from './components/admin/AdminInventory';
-import { AdminCustomers } from './components/admin/AdminCustomers';
+// Admin Components (All 7 Tabs)
+import { AdminLayout, AdminTab } from './components/admin/AdminLayout';
+import { AdminOverviewKPIs } from './components/admin/AdminOverviewKPIs';
+import { AdminAnalysisSales } from './components/admin/AdminAnalysisSales';
+import { AdminProductsManagement } from './components/admin/AdminProductsManagement';
+import { AdminCategoriesManagement } from './components/admin/AdminCategoriesManagement';
+import { AdminOrdersManagement } from './components/admin/AdminOrdersManagement';
+import { AdminVouchersManagement } from './components/admin/AdminVouchersManagement';
+import { AdminStoreControls } from './components/admin/AdminStoreControls';
 
-import { Product, FilterState, Order } from './types';
-import { Sparkles, ChevronRight, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Product, FilterState, Order, StoreSettings } from './types';
+import { Sparkles, ChevronRight, SlidersHorizontal, ArrowUpDown, Volume2, X } from 'lucide-react';
 
 function MainApp() {
   const { user } = useAuth();
@@ -33,13 +35,20 @@ function MainApp() {
 
   // Navigation State: 'store' | 'profile' | 'admin'
   const [currentView, setCurrentView] = useState<'store' | 'profile' | 'admin'>(() => {
-    if (window.location.pathname.startsWith('/admin')) {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    if (path.includes('admin') || hash.includes('admin') || search.includes('admin')) {
       return 'admin';
+    }
+    if (path.includes('profile') || hash.includes('profile')) {
+      return 'profile';
     }
     return 'store';
   });
 
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'products' | 'orders' | 'inventory' | 'customers'>('dashboard');
+  // Admin Tab: 'overview' | 'analysis' | 'products' | 'categories' | 'orders' | 'vouchers' | 'settings'
+  const [adminTab, setAdminTab] = useState<AdminTab>('overview');
 
   // Products and Filtering
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,6 +65,10 @@ function MainApp() {
     sortBy: 'featured'
   });
 
+  // Store Settings (Announcement Bar, etc.)
+  const [storeSettings, setStoreSettings] = useState<StoreSettings | null>(null);
+  const [isAnnouncementDismissed, setIsAnnouncementDismissed] = useState(false);
+
   // Modals & Drawers
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -64,23 +77,34 @@ function MainApp() {
   const [isStylistOpen, setIsStylistOpen] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Sync browser URL bar with state (e.g. /admin)
+  // Sync browser URL bar with state (e.g. /admin, /#admin, etc.)
   useEffect(() => {
-    const handlePopState = () => {
-      if (window.location.pathname.startsWith('/admin')) {
+    const handleUrlChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      if (path.includes('admin') || hash.includes('admin') || search.includes('admin')) {
         setCurrentView('admin');
+      } else if (path.includes('profile') || hash.includes('profile')) {
+        setCurrentView('profile');
       } else {
         setCurrentView('store');
       }
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
   const navigateTo = (view: 'store' | 'profile' | 'admin', categoryFilter?: string) => {
     setCurrentView(view);
     if (view === 'admin') {
       window.history.pushState({}, '', '/admin');
+    } else if (view === 'profile') {
+      window.history.pushState({}, '', '/profile');
     } else {
       window.history.pushState({}, '', '/');
     }
@@ -107,8 +131,25 @@ function MainApp() {
     }
   };
 
+  // Fetch store settings (storeName, announcementText, etc.)
+  const fetchStoreSettings = async () => {
+    try {
+      const res = await fetch('/api/store-settings');
+      if (res.ok) {
+        const data = await res.json();
+        setStoreSettings(data);
+        if (data.metaTitle) {
+          document.title = data.metaTitle;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load store settings:', err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchStoreSettings();
   }, []);
 
   // Filter & sort products
@@ -144,18 +185,35 @@ function MainApp() {
         onSelectTab={setAdminTab}
         onExitAdmin={() => navigateTo('store')}
       >
-        {adminTab === 'dashboard' && (
-          <AdminDashboard
+        {/* Tab 1: Overview & KPIs */}
+        {adminTab === 'overview' && (
+          <AdminOverviewKPIs
             onViewOrderInvoice={setActiveInvoiceOrder}
             onNavigateTab={setAdminTab}
           />
         )}
-        {adminTab === 'products' && <AdminProducts />}
-        {adminTab === 'orders' && <AdminOrders onViewInvoice={setActiveInvoiceOrder} />}
-        {adminTab === 'inventory' && <AdminInventory />}
-        {adminTab === 'customers' && <AdminCustomers />}
 
-        {/* Global Invoice Modal accessible from Admin */}
+        {/* Tab 2: Analysis & Sales */}
+        {adminTab === 'analysis' && <AdminAnalysisSales />}
+
+        {/* Tab 3: Products Management */}
+        {adminTab === 'products' && <AdminProductsManagement />}
+
+        {/* Tab 4: Categories Management */}
+        {adminTab === 'categories' && <AdminCategoriesManagement />}
+
+        {/* Tab 5: Orders & Courier Fulfillment */}
+        {adminTab === 'orders' && (
+          <AdminOrdersManagement onViewInvoice={setActiveInvoiceOrder} />
+        )}
+
+        {/* Tab 6: Vouchers & Coupons */}
+        {adminTab === 'vouchers' && <AdminVouchersManagement />}
+
+        {/* Tab 7: Store Controls */}
+        {adminTab === 'settings' && <AdminStoreControls />}
+
+        {/* Global Invoice Modal */}
         <InvoiceModal
           order={activeInvoiceOrder}
           onClose={() => setActiveInvoiceOrder(null)}
@@ -167,6 +225,23 @@ function MainApp() {
   // Client Storefront View
   return (
     <div className="min-h-screen bg-[#f8fafc] text-neutral-900 flex flex-col font-sans selection:bg-red-500 selection:text-white pb-20 lg:pb-0">
+      {/* Top Announcement Notice Bar (if enabled in Store Controls) */}
+      {storeSettings?.isAnnouncementActive && !isAnnouncementDismissed && (
+        <div className="bg-gradient-to-r from-[#b91c1c] via-[#e02424] to-[#b91c1c] text-white text-xs py-2 px-4 shadow-xs relative z-50 flex items-center justify-between">
+          <div className="flex-1 text-center font-bold tracking-wide flex items-center justify-center gap-2">
+            <Volume2 className="w-4 h-4 animate-pulse" />
+            <span>{storeSettings.announcementText}</span>
+          </div>
+          <button
+            onClick={() => setIsAnnouncementDismissed(true)}
+            className="text-white/80 hover:text-white p-1 rounded transition"
+            title="বন্ধ করুন"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Top Navbar */}
       <TechNovaNavbar
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -237,7 +312,7 @@ function MainApp() {
               {/* Products Grid: 4 columns on desktop, 2 columns on mobile */}
               {isLoadingProducts ? (
                 <div className="py-24 text-center text-neutral-400 text-xs">
-                  Loading electronics from TechNova catalog...
+                  Loading electronics catalog...
                 </div>
               ) : filteredProducts.length === 0 ? (
                 <div className="py-16 text-center space-y-4 bg-white rounded-xl border border-neutral-200 p-8 shadow-xs">
@@ -276,7 +351,7 @@ function MainApp() {
           <button
             onClick={() => setIsStylistOpen(true)}
             className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-[#0b0f19] hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-wider shadow-2xl transition transform hover:scale-105 group min-h-[48px] border border-neutral-700"
-            title="Ask TechNova AI"
+            title="Ask AI Assistant"
           >
             <div className="w-6 h-6 rounded-full bg-[#e02424] flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-white" />

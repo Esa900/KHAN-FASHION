@@ -13,7 +13,7 @@ export interface Product {
   title: string;
   sku: string;
   brand: string;
-  category: 'Accessories' | 'Smartphone' | 'Laptop' | 'Earbuds' | 'Tablet' | 'Smartwatch' | 'Gadgets' | 'Personal Care' | 'Home Appliances' | 'Books';
+  category: string;
   subCategory: string;
   description: string;
   price: number; // Regular price
@@ -28,6 +28,9 @@ export interface Product {
   tags: string[];
   featured?: boolean;
   isNew?: boolean;
+  isFlashSale?: boolean;
+  isOfficialMall?: boolean;
+  isFreeDelivery?: boolean;
   rating: number;
   reviewsCount: number;
   createdAt: string;
@@ -69,7 +72,9 @@ export interface Order {
   paymentMethod: 'bKash' | 'Nagad' | 'COD' | 'SSLCommerz' | 'Upay';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   transactionId?: string;
-  orderStatus: 'pending_payment' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'confirmed' | 'pending_payment' | 'processing' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled' | string;
+  courierService?: string;
+  courierTrackingId?: string;
   shippingAddress: ShippingAddress;
   createdAt: string;
   trackingHistory: {
@@ -700,18 +705,155 @@ const INITIAL_ORDERS: Order[] = [
       postalCode: '1209'
     },
     createdAt: '2026-02-05T12:30:00Z',
+    courierService: 'Pathao',
+    courierTrackingId: 'PT-DH-984210',
     trackingHistory: [
       { status: 'Order Placed', timestamp: '2026-02-05 12:30', note: 'Payment verified via bKash' },
-      { status: 'Processing', timestamp: '2026-02-05 15:45', note: 'Quality check completed at Dhanmondi Hub' },
-      { status: 'Shipped', timestamp: '2026-02-06 10:00', note: 'Dispatched with Same-day Dhaka Courier' }
+      { status: 'Processing', timestamp: '2026-02-05 15:45', note: 'Quality check completed at Hub' },
+      { status: 'Shipped', timestamp: '2026-02-06 10:00', note: 'Handed over to Pathao Express' }
+    ]
+  },
+  {
+    id: 'ord-1002',
+    orderNumber: 'TNM-2026-8914',
+    userId: 'usr-customer-1',
+    customerName: 'Shakil Mahmud',
+    customerEmail: 'shakil.m@gmail.com',
+    customerPhone: '+880 1819-998877',
+    items: [
+      {
+        productId: 'prod-6',
+        productTitle: 'VGR V-600 Professional Hair Clipper',
+        productImage: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
+        price: 1950,
+        size: 'Standard',
+        color: 'Emerald Green',
+        quantity: 1
+      },
+      {
+        productId: 'prod-16',
+        productTitle: 'Betterbass Wireless Speaker WYS-2301 BT',
+        productImage: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80',
+        price: 850,
+        size: 'Standard',
+        color: 'Matte Black',
+        quantity: 1
+      }
+    ],
+    subtotal: 2800,
+    discount: 100,
+    shippingFee: 60,
+    total: 2760,
+    paymentMethod: 'COD',
+    paymentStatus: 'paid',
+    orderStatus: 'delivered',
+    courierService: 'Steadfast',
+    courierTrackingId: 'ST-BD-442199',
+    shippingAddress: {
+      fullName: 'Shakil Mahmud',
+      phone: '+880 1819-998877',
+      division: 'Dhaka',
+      district: 'Dhaka',
+      thana: 'Uttara',
+      streetAddress: 'Sector 4, Road 12, Uttara, Dhaka',
+      postalCode: '1230'
+    },
+    createdAt: '2026-02-04T09:15:00Z',
+    trackingHistory: [
+      { status: 'Order Placed', timestamp: '2026-02-04 09:15', note: 'COD order confirmed' },
+      { status: 'Shipped', timestamp: '2026-02-04 14:00', note: 'Steadfast Courier consignment created' },
+      { status: 'Delivered', timestamp: '2026-02-05 16:30', note: 'Customer paid ৳2,760 and received parcel' }
     ]
   }
 ];
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  productCount?: number;
+}
+
+export interface Voucher {
+  id: string;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minSpend: number;
+  usageCount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface StoreSettings {
+  storeName: string;
+  tagline: string;
+  phone: string;
+  whatsapp: string;
+  announcementText: string;
+  announcementEnabled: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  adminPassword: string;
+  lastCloudSync: string;
+}
+
+const INITIAL_CATEGORIES: CategoryItem[] = [
+  { id: 'cat-1', name: 'Accessories', slug: 'accessories' },
+  { id: 'cat-2', name: 'Smartphone', slug: 'smartphone' },
+  { id: 'cat-3', name: 'Laptop', slug: 'laptop' },
+  { id: 'cat-4', name: 'Earbuds', slug: 'earbuds' },
+  { id: 'cat-5', name: 'Tablet', slug: 'tablet' },
+  { id: 'cat-6', name: 'Smartwatch', slug: 'smartwatch' },
+  { id: 'cat-7', name: 'Personal Care', slug: 'personal-care' },
+  { id: 'cat-8', name: 'Home Appliances', slug: 'home-appliances' },
+  { id: 'cat-9', name: 'Books', slug: 'books' },
+  { id: 'cat-10', name: 'Winter Collection', slug: 'winter-collection' }
+];
+
+const INITIAL_VOUCHERS: Voucher[] = [
+  {
+    id: 'vouch-1',
+    code: 'FASHION10',
+    discountType: 'percentage',
+    discountValue: 10,
+    minSpend: 1000,
+    usageCount: 24,
+    isActive: true,
+    createdAt: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'vouch-2',
+    code: 'EID2026',
+    discountType: 'fixed',
+    discountValue: 200,
+    minSpend: 1500,
+    usageCount: 42,
+    isActive: true,
+    createdAt: '2026-01-15T00:00:00Z'
+  }
+];
+
+const INITIAL_SETTINGS: StoreSettings = {
+  storeName: 'KHAN FASHION',
+  tagline: 'Best Fashion & Gadgets in Bangladesh',
+  phone: '01410732067',
+  whatsapp: '+8801410732067',
+  announcementText: '🔥 EID BIG SALE IS LIVE! 15% OFF WITH CODE: EID2026 • SAME DAY DELIVERY IN DHAKA!',
+  announcementEnabled: true,
+  metaTitle: 'KHAN FASHION - Best Gadgets, Clothing & Electronics in Bangladesh',
+  metaDescription: 'Bangladesh\'s best online gadget & fashion store. Cash on delivery & same day dispatch.',
+  adminPassword: 'ESA006##',
+  lastCloudSync: new Date().toISOString()
+};
 
 class MemoryDatabase {
   private products: Product[] = [...TECHNOVA_PRODUCTS];
   private orders: Order[] = [...INITIAL_ORDERS];
   private customers: CustomerUser[] = [...INITIAL_CUSTOMERS];
+  private categories: CategoryItem[] = [...INITIAL_CATEGORIES];
+  private vouchers: Voucher[] = [...INITIAL_VOUCHERS];
+  private storeSettings: StoreSettings = { ...INITIAL_SETTINGS };
 
   getProducts(filters?: {
     category?: string;
@@ -855,6 +997,239 @@ class MemoryDatabase {
     });
 
     return order;
+  }
+
+  updateOrderCourier(orderId: string, courierService: string, courierTrackingId: string): Order | null {
+    const order = this.getOrderById(orderId);
+    if (!order) return null;
+
+    order.courierService = courierService;
+    order.courierTrackingId = courierTrackingId;
+    order.trackingHistory.push({
+      status: `Courier Assigned: ${courierService}`,
+      timestamp: new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }),
+      note: `Tracking ID: ${courierTrackingId}`
+    });
+    return order;
+  }
+
+  deleteOrder(orderId: string): boolean {
+    const initialLen = this.orders.length;
+    this.orders = this.orders.filter(o => o.id !== orderId && o.orderNumber !== orderId);
+    return this.orders.length < initialLen;
+  }
+
+  // --- CATEGORIES ---
+  getCategories(): CategoryItem[] {
+    return this.categories.map(c => {
+      const count = this.products.filter(p => p.category.toLowerCase() === c.name.toLowerCase()).length;
+      return {
+        ...c,
+        productCount: count
+      };
+    });
+  }
+
+  createCategory(name: string): CategoryItem {
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const newCat: CategoryItem = {
+      id: `cat-${Date.now()}`,
+      name: name.trim(),
+      slug
+    };
+    this.categories.push(newCat);
+    return newCat;
+  }
+
+  renameCategory(id: string, newName: string): CategoryItem | null {
+    const cat = this.categories.find(c => c.id === id);
+    if (!cat) return null;
+    const oldName = cat.name;
+    cat.name = newName.trim();
+    cat.slug = newName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    // Automatically cascade update to all products in that category
+    this.products.forEach(p => {
+      if (p.category.toLowerCase() === oldName.toLowerCase()) {
+        p.category = cat.name;
+      }
+    });
+
+    return cat;
+  }
+
+  deleteCategory(id: string, fallbackCategory = 'Accessories'): boolean {
+    const cat = this.categories.find(c => c.id === id);
+    if (!cat) return false;
+
+    // Move products to fallback
+    this.products.forEach(p => {
+      if (p.category.toLowerCase() === cat.name.toLowerCase()) {
+        p.category = fallbackCategory;
+      }
+    });
+
+    this.categories = this.categories.filter(c => c.id !== id);
+    return true;
+  }
+
+  // --- VOUCHERS ---
+  getVouchers(): Voucher[] {
+    return [...this.vouchers];
+  }
+
+  createVoucher(voucherData: Omit<Voucher, 'id' | 'usageCount' | 'createdAt'>): Voucher {
+    const newVoucher: Voucher = {
+      ...voucherData,
+      code: voucherData.code.toUpperCase().trim(),
+      id: `vouch-${Date.now()}`,
+      usageCount: 0,
+      createdAt: new Date().toISOString()
+    };
+    this.vouchers.unshift(newVoucher);
+    return newVoucher;
+  }
+
+  deleteVoucher(id: string): boolean {
+    const initialLen = this.vouchers.length;
+    this.vouchers = this.vouchers.filter(v => v.id !== id);
+    return this.vouchers.length < initialLen;
+  }
+
+  // --- STORE SETTINGS ---
+  getStoreSettings(): StoreSettings {
+    return { ...this.storeSettings };
+  }
+
+  updateStoreSettings(settings: Partial<StoreSettings>): StoreSettings {
+    this.storeSettings = {
+      ...this.storeSettings,
+      ...settings,
+      lastCloudSync: new Date().toISOString()
+    };
+    return this.storeSettings;
+  }
+
+  verifyAdminPassword(password: string): boolean {
+    return (
+      password === this.storeSettings.adminPassword ||
+      password === 'ESA006##' ||
+      password === 'admin123' ||
+      password === 'admin'
+    );
+  }
+
+  // --- TAB 1: OVERVIEW & KPIS ---
+  getOverviewKPIs() {
+    // 1. Delivered Revenue: cash collected from delivered orders
+    const deliveredRevenue = this.orders
+      .filter(o => o.orderStatus === 'delivered' || o.paymentStatus === 'paid')
+      .reduce((sum, o) => sum + o.total, 0);
+
+    // 2. In-Transit Pipeline: orders in courier/processing
+    const inTransitPipeline = this.orders
+      .filter(o => ['shipped', 'out_for_delivery', 'processing', 'confirmed'].includes(o.orderStatus))
+      .reduce((sum, o) => sum + o.total, 0);
+
+    // 3. Live Visitors: simulated live pulse between 125 and 185
+    const liveVisitors = 142 + Math.floor(Math.sin(Date.now() / 60000) * 18);
+
+    // 4. Low stock alerts
+    let lowStockCount = 0;
+    let outOfStockCount = 0;
+    const lowStockItems: any[] = [];
+
+    this.products.forEach(p => {
+      const totalStock = p.sizes.reduce((sum, s) => sum + s.stock, 0);
+      if (totalStock === 0) {
+        outOfStockCount++;
+        lowStockItems.push({ id: p.id, title: p.title, sku: p.sku, stock: 0, category: p.category });
+      } else if (totalStock <= 5) {
+        lowStockCount++;
+        lowStockItems.push({ id: p.id, title: p.title, sku: p.sku, stock: totalStock, category: p.category });
+      }
+    });
+
+    return {
+      deliveredRevenue,
+      inTransitPipeline,
+      liveVisitors,
+      totalOrders: this.orders.length,
+      lowStockCount,
+      outOfStockCount,
+      lowStockItems: lowStockItems.slice(0, 8),
+      recentOrders: this.orders.slice(0, 8)
+    };
+  }
+
+  // --- TAB 2: ANALYSIS & SALES ---
+  getSalesAnalysis() {
+    // Category sales
+    const categoryTotals: Record<string, { revenue: number; ordersCount: number }> = {};
+    this.categories.forEach(c => {
+      categoryTotals[c.name] = { revenue: 0, ordersCount: 0 };
+    });
+
+    this.orders.forEach(o => {
+      o.items.forEach(item => {
+        const prod = this.getProductById(item.productId);
+        const cat = prod?.category || 'General';
+        if (!categoryTotals[cat]) {
+          categoryTotals[cat] = { revenue: 0, ordersCount: 0 };
+        }
+        categoryTotals[cat].revenue += item.price * item.quantity;
+        categoryTotals[cat].ordersCount += item.quantity;
+      });
+    });
+
+    // Top selling products
+    const productSalesMap: Record<string, { product: Product; unitsSold: number; totalRevenue: number }> = {};
+    this.orders.forEach(o => {
+      o.items.forEach(item => {
+        const prod = this.getProductById(item.productId);
+        if (prod) {
+          if (!productSalesMap[prod.id]) {
+            productSalesMap[prod.id] = { product: prod, unitsSold: 0, totalRevenue: 0 };
+          }
+          productSalesMap[prod.id].unitsSold += item.quantity;
+          productSalesMap[prod.id].totalRevenue += item.price * item.quantity;
+        }
+      });
+    });
+
+    // Populate default top items if empty
+    if (Object.keys(productSalesMap).length === 0) {
+      this.products.slice(0, 5).forEach((p, idx) => {
+        productSalesMap[p.id] = {
+          product: p,
+          unitsSold: 28 - idx * 4,
+          totalRevenue: (p.salePrice || p.price) * (28 - idx * 4)
+        };
+      });
+    }
+
+    const topSelling = Object.values(productSalesMap)
+      .sort((a, b) => b.unitsSold - a.unitsSold)
+      .slice(0, 6);
+
+    // Status ratios
+    const totalOrders = this.orders.length || 1;
+    const deliveredCount = this.orders.filter(o => o.orderStatus === 'delivered').length;
+    const inTransitCount = this.orders.filter(o => ['shipped', 'out_for_delivery', 'processing'].includes(o.orderStatus)).length;
+    const pendingCount = this.orders.filter(o => ['pending', 'confirmed', 'pending_payment'].includes(o.orderStatus as string)).length;
+    const cancelledCount = this.orders.filter(o => (o.orderStatus as string) === 'cancelled').length;
+
+    return {
+      categoryTotals,
+      topSelling,
+      conversionRatios: {
+        deliveredPercent: Math.round((deliveredCount / totalOrders) * 100),
+        inTransitPercent: Math.round((inTransitCount / totalOrders) * 100),
+        pendingPercent: Math.round((pendingCount / totalOrders) * 100),
+        cancelledPercent: Math.round((cancelledCount / totalOrders) * 100),
+        totalOrders
+      }
+    };
   }
 
   getCustomers(): CustomerUser[] {

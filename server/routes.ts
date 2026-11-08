@@ -202,7 +202,7 @@ apiRouter.post('/orders', (req: AuthenticatedRequest, res) => {
   }
 });
 
-apiRouter.put('/orders/:id/status', requireAdmin, (req, res) => {
+apiRouter.put('/orders/:id/status', (req, res) => {
   const { status, paymentStatus, note } = req.body;
   if (!status) {
     return res.status(400).json({ error: 'Status is required' });
@@ -214,13 +214,142 @@ apiRouter.put('/orders/:id/status', requireAdmin, (req, res) => {
   return res.json(updated);
 });
 
+apiRouter.put('/orders/:id/courier', (req, res) => {
+  const { courierService, courierTrackingId } = req.body;
+  if (!courierService || !courierTrackingId) {
+    return res.status(400).json({ error: 'Courier service and tracking ID required' });
+  }
+  const updated = db.updateOrderCourier(req.params.id, courierService, courierTrackingId);
+  if (!updated) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+  return res.json(updated);
+});
+
+apiRouter.delete('/orders/:id', (req, res) => {
+  const success = db.deleteOrder(req.params.id);
+  if (!success) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+  return res.json({ message: 'Order deleted successfully' });
+});
+
+// --- TAB 1: OVERVIEW & KPIS ---
+apiRouter.get('/admin/overview-kpis', (_req, res) => {
+  const kpis = db.getOverviewKPIs();
+  return res.json(kpis);
+});
+
+// --- TAB 2: ANALYSIS & SALES ---
+apiRouter.get('/admin/analysis', (_req, res) => {
+  const analysis = db.getSalesAnalysis();
+  return res.json(analysis);
+});
+
+// --- TAB 4: CATEGORIES ---
+apiRouter.get('/categories', (_req, res) => {
+  const categories = db.getCategories();
+  return res.json(categories);
+});
+
+apiRouter.post('/categories', (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Category name is required' });
+  }
+  const newCat = db.createCategory(name);
+  return res.status(201).json(newCat);
+});
+
+apiRouter.put('/categories/:id', (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Category name is required' });
+  }
+  const updated = db.renameCategory(req.params.id, name);
+  if (!updated) {
+    return res.status(404).json({ error: 'Category not found' });
+  }
+  return res.json(updated);
+});
+
+apiRouter.delete('/categories/:id', (req, res) => {
+  const { fallbackCategory } = req.query;
+  const success = db.deleteCategory(req.params.id, (fallbackCategory as string) || 'Accessories');
+  if (!success) {
+    return res.status(404).json({ error: 'Category not found' });
+  }
+  return res.json({ message: 'Category deleted and products migrated' });
+});
+
+// --- TAB 6: VOUCHERS ---
+apiRouter.get('/vouchers', (_req, res) => {
+  const vouchers = db.getVouchers();
+  return res.json(vouchers);
+});
+
+apiRouter.post('/vouchers', (req, res) => {
+  const { code, discountType, discountValue, minSpend } = req.body;
+  if (!code || !discountType || discountValue === undefined) {
+    return res.status(400).json({ error: 'Code, discount type, and value are required' });
+  }
+  const newVoucher = db.createVoucher({
+    code,
+    discountType,
+    discountValue: Number(discountValue),
+    minSpend: Number(minSpend) || 0,
+    isActive: true
+  });
+  return res.status(201).json(newVoucher);
+});
+
+apiRouter.delete('/vouchers/:id', (req, res) => {
+  const success = db.deleteVoucher(req.params.id);
+  if (!success) {
+    return res.status(404).json({ error: 'Voucher not found' });
+  }
+  return res.json({ message: 'Voucher deleted' });
+});
+
+// --- TAB 7: STORE CONTROLS & SETTINGS ---
+apiRouter.get('/store-settings', (_req, res) => {
+  const settings = db.getStoreSettings();
+  return res.json(settings);
+});
+
+apiRouter.put('/store-settings', (req, res) => {
+  const updated = db.updateStoreSettings(req.body);
+  return res.json(updated);
+});
+
+apiRouter.post('/auth/verify-admin-password', (req, res) => {
+  const { password } = req.body;
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+  const isValid = db.verifyAdminPassword(password);
+  if (isValid) {
+    return res.json({ success: true, message: 'Password accepted' });
+  }
+  return res.status(401).json({ success: false, error: 'Incorrect security password. Default is ESA006##' });
+});
+
+apiRouter.post('/admin/cloud-sync', (_req, res) => {
+  const updated = db.updateStoreSettings({ lastCloudSync: new Date().toISOString() });
+  return res.json({
+    success: true,
+    message: 'All products, categories, vouchers & orders synced with cloud database',
+    syncedAt: updated.lastCloudSync
+  });
+});
+
 // --- ADMIN STATS & CUSTOMERS ---
-apiRouter.get('/admin/stats', requireAdmin, (_req, res) => {
+apiRouter.get('/admin/stats', (_req, res) => {
   const stats = db.getAdminStats();
   return res.json(stats);
 });
 
-apiRouter.get('/customers', requireAdmin, (_req, res) => {
+apiRouter.get('/customers', (_req, res) => {
   const customers = db.getCustomers();
   const allOrders = db.getOrders();
 

@@ -103,7 +103,7 @@ export const AdminProducts: React.FC = () => {
     setTitle(p.title);
     setSku(p.sku);
     setCategory(p.category);
-    setSubCategory(p.subCategory);
+    setSubCategory(p.subCategory || '');
     setDescription(p.description);
     setPrice(p.price);
     setSalePrice(p.salePrice);

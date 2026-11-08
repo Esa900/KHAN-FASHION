@@ -73,27 +73,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           <span className="text-[10px] font-medium tracking-tight mt-0.5">Bag</span>
         </button>
 
-        {/* User Account / Admin toggle */}
+        {/* Admin Panel Link */}
         <button
           onClick={() => {
-            if (user?.role === 'admin') {
-              onNavigate('admin');
-            } else {
-              onNavigate('profile');
-            }
+            onNavigate('admin');
           }}
           className={`flex flex-col items-center justify-center min-h-[44px] transition ${
-            currentView === 'profile' || currentView === 'admin' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
+            currentView === 'admin' ? 'text-[#e02424]' : 'text-neutral-400 hover:text-white'
           }`}
-          aria-label="Account"
+          aria-label="Admin Panel"
         >
-          {user?.role === 'admin' ? (
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-          ) : (
-            <User className="w-5 h-5" />
-          )}
-          <span className="text-[10px] font-medium tracking-tight mt-0.5">
-            {user?.role === 'admin' ? 'Admin' : 'Account'}
+          <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          <span className="text-[10px] font-bold tracking-tight mt-0.5 text-emerald-400">
+            Admin
           </span>
         </button>
       </div>

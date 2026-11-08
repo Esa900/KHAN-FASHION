@@ -160,6 +160,16 @@ export const TechNovaNavbar: React.FC<TechNovaNavbarProps> = ({
               <span>AI Assistant</span>
             </button>
 
+            {/* Direct Admin Panel Button */}
+            <button
+              onClick={() => onNavigate('admin')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer min-h-[36px]"
+              title="Open Admin Panel (/admin)"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Admin</span>
+            </button>
+
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}

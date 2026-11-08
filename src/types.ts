@@ -13,8 +13,8 @@ export interface Product {
   title: string;
   sku: string;
   brand?: string;
-  category: 'Accessories' | 'Smartphone' | 'Laptop' | 'Earbuds' | 'Tablet' | 'Smartwatch' | 'Gadgets' | 'Personal Care' | 'Home Appliances' | 'Books';
-  subCategory: string;
+  category: string;
+  subCategory?: string;
   description: string;
   price: number; // in BDT
   salePrice?: number;
@@ -28,6 +28,9 @@ export interface Product {
   tags: string[];
   featured?: boolean;
   isNew?: boolean;
+  isFlashSale?: boolean;
+  isOfficialMall?: boolean;
+  isFreeDelivery?: boolean;
   rating: number;
   reviewsCount: number;
   createdAt: string;
@@ -40,6 +43,8 @@ export interface CartItem {
   quantity: number;
 }
 
+export type OrderStatus = 'Pending' | 'Confirmed' | 'Processing' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | string;
+
 export interface ShippingAddress {
   fullName: string;
   phone: string;
@@ -47,6 +52,8 @@ export interface ShippingAddress {
   district: string;
   thana: string;
   streetAddress: string;
+  address?: string; // alias for streetAddress
+  city?: string; // alias for district/city
   postalCode?: string;
   orderNotes?: string;
 }
@@ -73,10 +80,14 @@ export interface Order {
   discount: number;
   shippingFee: number;
   total: number;
+  totalAmount?: number; // alias for total
   paymentMethod: 'bKash' | 'Nagad' | 'COD' | 'SSLCommerz' | 'Upay';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   transactionId?: string;
-  orderStatus: 'pending_payment' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'out_for_delivery' | 'delivered' | 'cancelled' | string;
+  status?: OrderStatus; // alias for orderStatus
+  courierService?: 'Steadfast' | 'Pathao' | 'RedX' | 'Sundarban' | 'eCourier' | string;
+  courierTrackingId?: string;
   shippingAddress: ShippingAddress;
   createdAt: string;
   trackingHistory: {
@@ -84,6 +95,40 @@ export interface Order {
     timestamp: string;
     note: string;
   }[];
+}
+
+export interface Voucher {
+  id: string;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minSpend: number;
+  usageCount: number;
+  usedCount?: number; // alias
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  productCount?: number;
+}
+
+export interface StoreSettings {
+  storeName: string;
+  tagline: string;
+  phone: string;
+  whatsapp: string;
+  announcementText: string;
+  announcementEnabled?: boolean;
+  isAnnouncementActive?: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  adminPassword?: string;
+  lastCloudSync?: string;
 }
 
 export interface CustomerUser {
