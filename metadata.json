@@ -1,0 +1,6 @@
+{
+  "name": "AURA Bangladesh - Luxury Fashion & Admin Suite",
+  "description": "High-fashion Bangladeshi and contemporary fashion platform with AI Stylist, Smart Search, full Admin Suite, inventory & order tracking, bKash/Nagad/COD checkout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
