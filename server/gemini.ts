@@ -16,4 +16,4 @@ export const ai = apiKey
     })
   : null;
 
-export const MODEL_NAME = 'gemini-3.8-flash';
+export const MODEL_NAME = 'gemini-4-hydrogen';
