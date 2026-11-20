@@ -42,24 +42,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default to DEFAULT_ADMIN so users can instantly open and manage the Admin Panel
+  // Default to DEFAULT_CUSTOMER for storefront visitors
   const [user, setUser] = useState<CustomerUser | null>(() => {
     try {
       const savedUser = localStorage.getItem('technova_user');
       if (savedUser) {
-        return JSON.parse(savedUser);
+        const parsed = JSON.parse(savedUser);
+        if (parsed?.role !== 'admin') {
+          return parsed;
+        }
       }
     } catch (e) {
       console.error('Failed to parse technova_user:', e);
     }
-    return DEFAULT_ADMIN;
+    return DEFAULT_CUSTOMER;
   });
 
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return localStorage.getItem('technova_token') || 'demo_admin_jwt_token';
+      const savedToken = localStorage.getItem('technova_token');
+      if (savedToken && savedToken !== 'demo_admin_jwt_token') {
+        return savedToken;
+      }
+      return 'demo_customer_jwt_token';
     } catch {
-      return 'demo_admin_jwt_token';
+      return 'demo_customer_jwt_token';
     }
   });
 

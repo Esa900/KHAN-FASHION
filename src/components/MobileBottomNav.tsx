@@ -1,11 +1,10 @@
 import React from 'react';
-import { Home, Sparkles, ShoppingBag, User, SlidersHorizontal, ShieldCheck } from 'lucide-react';
+import { Home, Sparkles, ShoppingBag, User, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 
 interface MobileBottomNavProps {
   currentView: 'store' | 'profile' | 'admin';
-  onNavigate: (view: 'store' | 'profile' | 'admin', categoryFilter?: string) => void;
+  onNavigate: (view: 'store' | 'profile', categoryFilter?: string) => void;
   onOpenStylist: () => void;
   onOpenFilterSheet: () => void;
 }
@@ -17,18 +16,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onOpenFilterSheet
 }) => {
   const { itemCount, setIsCartOpen } = useCart();
-  const { user } = useAuth();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 backdrop-blur-lg border-t border-neutral-800/80 px-2 py-1 shadow-2xl safe-area-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0b0f19]/95 backdrop-blur-lg border-t border-neutral-800 px-2 py-1 shadow-2xl safe-area-bottom">
       <div className="grid grid-cols-5 items-center h-14">
         {/* Home / Shop */}
         <button
-          onClick={() => onNavigate('store')}
+          onClick={() => onNavigate('store', 'All')}
           className={`flex flex-col items-center justify-center min-h-[44px] transition ${
-            currentView === 'store' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
+            currentView === 'store' ? 'text-[#e02424]' : 'text-neutral-400 hover:text-neutral-200'
           }`}
-          aria-label="Home and Drops"
+          aria-label="Shop"
         >
           <Home className="w-5 h-5" />
           <span className="text-[10px] font-medium tracking-tight mt-0.5">Shop</span>
@@ -37,23 +35,23 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         {/* Filter Sheet Trigger */}
         <button
           onClick={onOpenFilterSheet}
-          className="flex flex-col items-center justify-center min-h-[44px] text-neutral-400 hover:text-amber-300 transition"
+          className="flex flex-col items-center justify-center min-h-[44px] text-neutral-400 hover:text-white transition"
           aria-label="Filter Catalog"
         >
           <SlidersHorizontal className="w-5 h-5" />
           <span className="text-[10px] font-medium tracking-tight mt-0.5">Filter</span>
         </button>
 
-        {/* AI Stylist Center Anchor */}
+        {/* AI Assistant Center Anchor */}
         <button
           onClick={onOpenStylist}
           className="flex flex-col items-center justify-center -mt-3.5"
-          aria-label="Aura AI Stylist"
+          aria-label="AI Assistant"
         >
-          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 text-neutral-950 flex items-center justify-center shadow-lg shadow-amber-500/25 active:scale-95 transition-transform">
+          <div className="w-11 h-11 rounded-full bg-[#e02424] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform">
             <Sparkles className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-bold text-amber-400 tracking-tight mt-0.5">AI Stylist</span>
+          <span className="text-[9px] font-bold text-red-400 tracking-tight mt-0.5">AI Help</span>
         </button>
 
         {/* Cart Bag */}
@@ -65,28 +63,24 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           <div className="relative">
             <ShoppingBag className="w-5 h-5" />
             {itemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 px-1.5 min-w-[16px] h-4 rounded-full bg-amber-400 text-neutral-950 text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-2 px-1.5 min-w-[16px] h-4 rounded-full bg-[#e02424] text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
                 {itemCount}
               </span>
             )}
           </div>
-          <span className="text-[10px] font-medium tracking-tight mt-0.5">Bag</span>
+          <span className="text-[10px] font-medium tracking-tight mt-0.5">Cart</span>
         </button>
 
-        {/* Admin Panel Link */}
+        {/* Customer Orders & Profile */}
         <button
-          onClick={() => {
-            onNavigate('admin');
-          }}
+          onClick={() => onNavigate('profile')}
           className={`flex flex-col items-center justify-center min-h-[44px] transition ${
-            currentView === 'admin' ? 'text-[#e02424]' : 'text-neutral-400 hover:text-white'
+            currentView === 'profile' ? 'text-[#e02424]' : 'text-neutral-400 hover:text-white'
           }`}
-          aria-label="Admin Panel"
+          aria-label="My Orders"
         >
-          <ShieldCheck className="w-5 h-5 text-emerald-400" />
-          <span className="text-[10px] font-bold tracking-tight mt-0.5 text-emerald-400">
-            Admin
-          </span>
+          <User className="w-5 h-5" />
+          <span className="text-[10px] font-medium tracking-tight mt-0.5">Orders</span>
         </button>
       </div>
     </nav>

@@ -21,10 +21,10 @@ export const SmartSearchModal: React.FC<SmartSearchModalProps> = ({
   if (!isOpen) return null;
 
   const exampleQueries = [
-    'Blue cotton Punjabi for Eid prayer',
-    'Heirloom Jamdani saree for wedding guest',
-    'Breathable summer linen shirt for casual dinner',
-    'Luxury winter cashmere coat for evening gala'
+    'AMOLED smartwatch with Bluetooth calling',
+    'Noise cancelling wireless earbuds under 2000',
+    'Stainless steel electric kettle 2 liter',
+    'Professional rechargeable hair trimmer'
   ];
 
   const handleSearch = async (searchTerm: string) => {

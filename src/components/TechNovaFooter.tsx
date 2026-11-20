@@ -1,8 +1,8 @@
 import React from 'react';
-import { MapPin, Phone, Mail, ShieldCheck } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 interface TechNovaFooterProps {
-  onNavigate: (view: 'store' | 'profile' | 'admin', categoryFilter?: string) => void;
+  onNavigate: (view: 'store' | 'profile', categoryFilter?: string) => void;
   onOpenProfile: () => void;
 }
 
@@ -93,15 +93,6 @@ export const TechNovaFooter: React.FC<TechNovaFooterProps> = ({
                   className="hover:text-white transition"
                 >
                   Contact
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('admin')}
-                  className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin Panel</span>
                 </button>
               </li>
             </ul>

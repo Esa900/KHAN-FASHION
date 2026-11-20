@@ -105,7 +105,6 @@ export const TechNovaHero: React.FC<TechNovaHeroProps> = ({ onShopNow }) => {
 
               {/* Device 4: AirPods Pro Case */}
               <div className="absolute left-28 sm:left-40 bottom-0 w-20 sm:w-24 aspect-[4/3] bg-white rounded-xl shadow-2xl border border-neutral-200 p-2 z-30 flex flex-col items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 mb-1 animate-pulse" />
                 <Headphones className="w-5 h-5 text-neutral-800" />
                 <span className="text-[7px] text-neutral-500 font-bold mt-1">AirPods</span>
               </div>
